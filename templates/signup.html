@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign Up - TravelEase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
+                    <i class="fas fa-plane text-white text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    TravelEase
+                </h1>
+            </div>
+            <p class="text-gray-600">Join us today and start your amazing journey!</p>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Create Account</h2>
+                <p class="text-gray-600">Fill in your details to get started</p>
+            </div>
+
+            <form method="POST" action="{% url 'signup' %}" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block font-medium mb-2 text-gray-700">
+                        <i class="fas fa-user mr-2 text-blue-500"></i>Username
+                    </label>
+                    <input type="text" id="username" name="username" required
+                           class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                           placeholder="Choose a unique username" />
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block font-medium mb-2 text-gray-700">
+                        <i class="fas fa-envelope mr-2 text-blue-500"></i>Email Address
+                    </label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                           placeholder="john@example.com" />
+                </div>
+
+                <!-- Password Fields -->
+                <div>
+                    <label for="password1" class="block font-medium mb-2 text-gray-700">
+                        <i class="fas fa-lock mr-2 text-blue-500"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="password1" name="password1" required
+                               class="w-full p-4 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                               placeholder="Create a strong password" />
+                        <button type="button" onclick="togglePassword('password1')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye" id="password1-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password2" class="block font-medium mb-2 text-gray-700">
+                        <i class="fas fa-lock mr-2 text-blue-500"></i>Confirm Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="password2" name="password2" required
+                               class="w-full p-4 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                               placeholder="Confirm your password" />
+                        <button type="button" onclick="togglePassword('password2')" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye" id="password2-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="flex items-start">
+                    <input type="checkbox" name="terms" required class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 mt-1">
+                    <label class="ml-3 text-sm text-gray-600">
+                        I agree to the 
+                        <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300">Terms of Service</a>
+                        and 
+                        <a href="#" class="text-blue-600 hover:text-blue-800 transition duration-300">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Sign Up Button -->
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="fas fa-user-plus mr-2"></i>Create Account
+                </button>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or sign up with</span>
+                    </div>
+                </div>
+
+                <!-- Social Login Buttons -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" class="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition duration-300">
+                        <i class="fab fa-google text-red-500 mr-2"></i>
+                        <span class="text-gray-700 font-medium">Google</span>
+                    </button>
+                    <button type="button" class="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition duration-300">
+                        <i class="fab fa-facebook text-blue-600 mr-2"></i>
+                        <span class="text-gray-700 font-medium">Facebook</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Sign In Link -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-600">
+                    Already have an account? 
+                    <a href="{% url 'signin' %}" class="text-blue-600 hover:text-blue-800 font-semibold transition duration-300">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="{% url 'home' %}" class="text-gray-600 hover:text-blue-600 transition duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const eye = document.getElementById(fieldId + '-eye');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                eye.className = 'fas fa-eye-slash';
+            } else {
+                field.type = 'password';
+                eye.className = 'fas fa-eye';
+            }
+        }
+
+        // Password validation
+        document.getElementById('password2').addEventListener('input', function() {
+            const password1 = document.getElementById('password1').value;
+            const password2 = this.value;
+            
+            if (password2 && password1 !== password2) {
+                this.setCustomValidity('Passwords do not match');
+                this.classList.add('border-red-500');
+                this.classList.remove('border-gray-300');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('border-red-500');
+                this.classList.add('border-gray-300');
+            }
+        });
+    </script>
+
+</body>
+</html>

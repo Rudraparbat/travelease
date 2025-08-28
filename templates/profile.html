@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - TravelEase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        .gradient-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                        <i class="fas fa-plane text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        TravelEase
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600 transition duration-300">
+                        <i class="fas fa-home mr-1"></i>Home
+                    </a>
+                    <a href="{% url 'mybookings' %}" class="text-gray-700 hover:text-blue-600 transition duration-300">
+                        <i class="fas fa-suitcase mr-1"></i>My Bookings
+                    </a>
+                    <a href="{% url 'profile' %}" class="text-blue-600 font-semibold">
+                        <i class="fas fa-user mr-1"></i>Profile
+                    </a>
+                    <a href="{% url 'logout' %}" class="text-red-500 hover:text-red-600 font-semibold transition duration-300">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="fade-in">
+                <div class="w-24 h-24 bg-white rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user text-4xl text-blue-600"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
+                    Welcome, {{ user.first_name|default:user.username }}!
+                </h1>
+                <p class="text-xl text-white opacity-90">Manage your profile and account settings</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+        <!-- Quick Actions Card -->
+        <div class="bg-white rounded-2xl shadow-lg mb-8 fade-in">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-tachometer-alt text-blue-500 mr-3"></i>Quick Actions
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{% url 'mybookings' %}" 
+                       class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <i class="fas fa-suitcase text-2xl mb-2"></i>
+                        <h3 class="font-semibold">My Bookings</h3>
+                        <p class="text-sm opacity-90">View & manage trips</p>
+                    </a>
+                    
+                    <a href="{% url 'home' %}" 
+                       class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <i class="fas fa-search text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Explore Trips</h3>
+                        <p class="text-sm opacity-90">Find new adventures</p>
+                    </a>
+                    
+                    <button onclick="document.getElementById('passwordSection').scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 shadow-lg">
+                        <i class="fas fa-lock text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Change Password</h3>
+                        <p class="text-sm opacity-90">Update security</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="bg-white rounded-2xl shadow-lg mb-8 fade-in">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-user-edit text-blue-500 mr-3"></i>Profile Information
+                </h2>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-xl {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %} mr-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'update_profile' %}" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2 text-blue-500"></i>Username
+                            </label>
+                            <input type="text" id="username" name="username" value="{{ user.username }}" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-blue-500"></i>Email Address
+                            </label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-id-card mr-2 text-blue-500"></i>First Name
+                            </label>
+                            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                        </div>
+                        
+                        <div>
+                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-id-card mr-2 text-blue-500"></i>Last Name
+                            </label>
+                            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" name="update_info" value="1"
+                                class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <i class="fas fa-save mr-2"></i>Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Change Section -->
+        <div id="passwordSection" class="bg-white rounded-2xl shadow-lg mb-8 fade-in">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-shield-alt text-green-500 mr-3"></i>Change Password
+                </h2>
+
+                <form method="POST" action="{% url 'update_profile' %}" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-yellow-500 mr-3"></i>
+                            <p class="text-yellow-700 text-sm">
+                                Leave password fields empty if you don't want to change your password.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="old_password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-key mr-2 text-green-500"></i>Current Password
+                        </label>
+                        <input type="password" id="old_password" name="old_password"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300"
+                               placeholder="Enter your current password">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="new_password1" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock mr-2 text-green-500"></i>New Password
+                            </label>
+                            <input type="password" id="new_password1" name="new_password1"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300"
+                                   placeholder="Enter new password">
+                        </div>
+                        
+                        <div>
+                            <label for="new_password2" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock mr-2 text-green-500"></i>Confirm New Password
+                            </label>
+                            <input type="password" id="new_password2" name="new_password2"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300"
+                                   placeholder="Confirm new password">
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" name="change_password" value="1"
+                                class="w-full md:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <i class="fas fa-shield-alt mr-2"></i>Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Account Statistics -->
+        <div class="bg-white rounded-2xl shadow-lg mb-8 fade-in">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-bar text-purple-500 mr-3"></i>Account Statistics
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 bg-blue-50 rounded-xl">
+                        <i class="fas fa-calendar-check text-3xl text-blue-500 mb-2"></i>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ total_bookings|default:0 }}</h3>
+                        <p class="text-gray-600">Total Bookings</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <i class="fas fa-map-marker-alt text-3xl text-green-500 mb-2"></i>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ destinations_visited|default:0 }}</h3>
+                        <p class="text-gray-600">Destinations</p>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-xl">
+                        <i class="fas fa-star text-3xl text-purple-500 mb-2"></i>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ user.date_joined|date:"Y" }}</h3>
+                        <p class="text-gray-600">Member Since</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                        <i class="fas fa-plane text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        TravelEase
+                    </h3>
+                </div>
+                <p class="text-gray-400">© 2025 TravelEase. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

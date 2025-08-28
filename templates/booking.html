@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Trip - {{ trip.source }} to {{ trip.destination }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .seat {
+            width: 40px;
+            height: 40px;
+            margin: 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .seat.available {
+            background-color: #e5e7eb;
+            border: 2px solid #d1d5db;
+            color: #6b7280;
+        }
+        .seat.available:hover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .seat.selected {
+            background-color: #3b82f6;
+            border: 2px solid #1d4ed8;
+            color: white;
+        }
+        .seat.booked {
+            background-color: #ef4444;
+            border: 2px solid #dc2626;
+            color: white;
+            cursor: not-allowed;
+        }
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                        <i class="fas fa-plane text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        TravelEase
+                    </h1>
+                </div>
+
+                <!-- Navigation Icons -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="{% url 'home' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Home">
+                        <i class="fas fa-home text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Destinations">
+                        <i class="fas fa-map-marked-alt text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="About Us">
+                        <i class="fas fa-info-circle text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Contact Us">
+                        <i class="fas fa-phone text-xl"></i>
+                    </a>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative group">
+                        <button class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white hover:from-blue-700 hover:to-purple-700 transition duration-300">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="py-1">
+                                <a href="{% url 'errorpage' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ user.username }}</a>
+                                <a href="{% url 'mybookings' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Bookings</a>
+                                <a href="{% url 'errorpage' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Settings</a>
+                                <hr class="my-1">
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-6 min-h-screen">
+        <!-- Back Button -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <a href="{% url 'details' trip.id %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Trip Details
+            </a>
+        </div>
+
+        <!-- Booking Header -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <div class="relative z-10">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Complete Your Booking</h1>
+                    <p class="text-xl opacity-90 mb-4">{{ trip.source }} → {{ trip.destination }}</p>
+                    <div class="flex items-center space-x-6">
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <span class="font-semibold">{{ travelers }}</span>
+                            <span class="opacity-90 ml-1">Traveler{{ travelers|pluralize }}</span>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <span class="font-semibold">₹{{ total_price }}</span>
+                            <span class="opacity-90 ml-1">Total</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Booking Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Step 1: Seat Selection -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white rounded-2xl shadow-lg p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-chair text-blue-500 mr-3"></i>
+                            Step 1: Select Your Seats
+                        </h3>
+                        
+                        <!-- Seat Legend -->
+                        <div class="flex items-center space-x-6 mb-6">
+                            <div class="flex items-center">
+                                <div class="seat available mr-2"></div>
+                                <span class="text-sm text-gray-600">Available</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="seat selected mr-2"></div>
+                                <span class="text-sm text-gray-600">Selected</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="seat booked mr-2"></div>
+                                <span class="text-sm text-gray-600">Booked</span>
+                            </div>
+                        </div>
+
+                        <!-- Seat Layout -->
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <!-- Driver/Front indicator -->
+                            <div class="text-center mb-6">
+                                <div class="inline-block bg-gray-300 rounded-lg px-6 py-2 text-gray-600 font-medium">
+                                    <i class="fas fa-steering-wheel mr-2"></i>Driver
+                                </div>
+                            </div>
+                            
+                            <!-- Seats Grid -->
+                            <div id="seatLayout" class="max-w-md mx-auto">
+                                {% for row in "0123456789"|make_list %}
+                                <div class="seat-row">
+                                    <div class="flex items-center space-x-4">
+                                        <!-- Left side seats (A, B) -->
+                                        <div class="flex">
+                                            {% with seat_num_a=forloop.counter0|add:"0" seat_num_b=forloop.counter0|add:"10" %}
+                                            <div class="seat available" data-seat="{{ seat_num_a }}" data-row="{{ forloop.counter }}" data-col="A">
+                                                {{ forloop.counter }}A
+                                            </div>
+                                            <div class="seat available" data-seat="{{ seat_num_b }}" data-row="{{ forloop.counter }}" data-col="B">
+                                                {{ forloop.counter }}B
+                                            </div>
+                                            {% endwith %}
+                                        </div>
+                                        
+                                        <!-- Aisle -->
+                                        <div class="w-8"></div>
+                                        
+                                        <!-- Right side seats (C, D) -->
+                                        <div class="flex">
+                                            {% with seat_num_c=forloop.counter0|add:"20" seat_num_d=forloop.counter0|add:"30" %}
+                                            <div class="seat available" data-seat="{{ seat_num_c }}" data-row="{{ forloop.counter }}" data-col="C">
+                                                {{ forloop.counter }}C
+                                            </div>
+                                            <div class="seat available" data-seat="{{ seat_num_d }}" data-row="{{ forloop.counter }}" data-col="D">
+                                                {{ forloop.counter }}D
+                                            </div>
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Selected seats info -->
+                            <div class="mt-6 text-center">
+                                <div id="selectedSeatsInfo" class="text-gray-600">
+                                    Please select {{ travelers }} seat{{ travelers|pluralize }} to continue
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Passenger Details -->
+                    <div id="passengerDetailsSection" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-users text-green-500 mr-3"></i>
+                            Step 2: Passenger Details
+                        </h3>
+                        
+                        <div id="passengerForms" class="space-y-6">
+                            <!-- Dynamic passenger forms will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Summary -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-lg p-8 sticky top-24">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-receipt text-green-500 mr-3"></i>
+                            Booking Summary
+                        </h3>
+                        
+                        <!-- Trip Details -->
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Trip</span>
+                                <span class="font-medium text-sm">{{ trip.source }} → {{ trip.destination }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration</span>
+                                <span class="font-medium">{{ trip.days }}D/{{ trip.nights }}N</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Travel Mode</span>
+                                <span class="font-medium">{{ trip.traveltype.travel_mode }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Departure</span>
+                                <span class="font-medium">{{ trip.travel_date|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Selected Seats -->
+                        <div id="selectedSeatsDisplay" class="mb-6 hidden">
+                            <h4 class="font-semibold text-gray-800 mb-2">Selected Seats</h4>
+                            <div id="seatsList" class="flex flex-wrap gap-1"></div>
+                        </div>
+
+                        <!-- Price Breakdown -->
+                        <div class="border-t border-gray-200 pt-6 mb-6">
+                            <div class="flex justify-between mb-3">
+                                <span class="text-gray-600">Price per person</span>
+                                <span class="font-medium">₹{{ trip.price }}</span>
+                            </div>
+                            <div class="flex justify-between mb-3">
+                                <span class="text-gray-600">Travelers</span>
+                                <span class="font-medium">{{ travelers }}</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-3">
+                                <span>Total Amount</span>
+                                <span class="text-blue-600">₹{{ total_price }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <button id="proceedToDetails" class="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed transition-all duration-300" disabled>
+                                <i class="fas fa-arrow-right mr-2"></i>Proceed to Details
+                            </button>
+                            
+                            <button id="completeBooking" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hidden" onclick="createBooking()">
+                                <i class="fas fa-credit-card mr-2"></i>Pay - ₹{{ total_price }} 
+                            </button>
+
+                            <button id="offlinebooking" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 hidden" onclick="initiateOfflineBooking()">
+                                <i class="fas fa-credit-card mr-2"></i>Book Offline 
+                            </button>
+                        </div>
+
+                        <!-- Trust Indicators -->
+                        <div class="mt-8 pt-8 border-t border-gray-200">
+                            <h4 class="font-semibold text-gray-800 mb-4">Secure Booking</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-shield-alt text-green-500 mr-3"></i>
+                                    <span>SSL Encrypted</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-undo text-blue-500 mr-3"></i>
+                                    <span>Free Cancellation</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-headset text-purple-500 mr-3"></i>
+                                    <span>24/7 Support</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                            <i class="fas fa-plane text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                            TravelEase
+                        </h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        Your trusted companion for unforgettable travel experiences.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home' %}" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="{% url 'errorpage' %}" class="text-gray-400 hover:text-white transition duration-300">Destinations</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span>info@travelease.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            <span>+91 12345 67890</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400">© 2025 TravelEase. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data -->
+    <div id="bookingData" 
+        data-travelers="{{ travelers }}"
+        data-booked-seats="{{ booked_seats|safe }}"
+        data-trip-id="{{ trip.id }}">
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        const bookingData = document.getElementById('bookingData');
+        let selectedSeats = [];
+        let requiredSeats = parseInt(bookingData.dataset.travelers);
+        let bookedSeats = JSON.parse(bookingData.dataset.bookedSeats);
+        let tripId = parseInt(bookingData.dataset.tripId);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSeats();
+            
+            document.getElementById('proceedToDetails').addEventListener('click', showPassengerDetails);
+            document.getElementById('completeBooking').addEventListener('click', completeBooking);
+        });
+
+        function initializeSeats() {
+            const seats = document.querySelectorAll('.seat');
+            
+            seats.forEach(seat => {
+                const seatNumber = parseInt(seat.dataset.seat);
+                
+                // Mark booked seats
+                if (bookedSeats.includes(seatNumber)) {
+                    seat.classList.remove('available');
+                    seat.classList.add('booked');
+                    return;
+                }
+                
+                seat.addEventListener('click', function() {
+                    if (this.classList.contains('booked')) return;
+                    
+                    if (this.classList.contains('selected')) {
+                        // Deselect seat
+                        this.classList.remove('selected');
+                        this.classList.add('available');
+                        selectedSeats = selectedSeats.filter(s => s !== seatNumber);
+                    } else if (selectedSeats.length < requiredSeats) {
+                        // Select seat
+                        this.classList.remove('available');
+                        this.classList.add('selected');
+                        selectedSeats.push(seatNumber);
+                    }
+                    
+                    updateSeatSelection();
+                });
+            });
+        }
+
+        function updateSeatSelection() {
+            const selectedSeatsInfo = document.getElementById('selectedSeatsInfo');
+            const selectedSeatsDisplay = document.getElementById('selectedSeatsDisplay');
+            const seatsList = document.getElementById('seatsList');
+            const proceedBtn = document.getElementById('proceedToDetails');
+            
+            if (selectedSeats.length === 0) {
+                selectedSeatsInfo.textContent = `Please select ${requiredSeats} seat${requiredSeats > 1 ? 's' : ''} to continue`;
+                selectedSeatsDisplay.classList.add('hidden');
+                proceedBtn.disabled = true;
+                proceedBtn.className = 'w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed transition-all duration-300';
+            } else if (selectedSeats.length < requiredSeats) {
+                selectedSeatsInfo.textContent = `Selected ${selectedSeats.length}/${requiredSeats} seats`;
+                updateSeatsList();
+                selectedSeatsDisplay.classList.remove('hidden');
+                proceedBtn.disabled = true;
+                proceedBtn.className = 'w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed transition-all duration-300';
+            } else {
+                selectedSeatsInfo.textContent = `${selectedSeats.length} seats selected`;
+                updateSeatsList();
+                selectedSeatsDisplay.classList.remove('hidden');
+                proceedBtn.disabled = false;
+                proceedBtn.className = 'w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5';
+            }
+        }
+
+        function updateSeatsList() {
+            const seatsList = document.getElementById('seatsList');
+            seatsList.innerHTML = '';
+            
+            selectedSeats.forEach(seatNum => {
+                const seatElement = document.querySelector(`[data-seat="${seatNum}"]`);
+                const seatLabel = seatElement.textContent;
+                
+                const seatBadge = document.createElement('span');
+                seatBadge.className = 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium';
+                seatBadge.textContent = seatLabel;
+                seatsList.appendChild(seatBadge);
+            });
+        }
+
+        function showPassengerDetails() {
+            if (selectedSeats.length !== requiredSeats) return;
+            
+            const passengerSection = document.getElementById('passengerDetailsSection');
+            const passengerForms = document.getElementById('passengerForms');
+            
+            // Generate passenger forms
+            passengerForms.innerHTML = '';
+            
+            for (let i = 0; i < requiredSeats; i++) {
+                const seatElement = document.querySelector(`[data-seat="${selectedSeats[i]}"]`);
+                const seatLabel = seatElement.textContent;
+                
+                const formHTML = `
+                    <div class="border rounded-xl p-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                            Passenger ${i + 1} - Seat ${seatLabel}
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-medium mb-2 text-gray-700">Full Name *</label>
+                                <input type="text" name="passenger_${i}_name" required
+                                       class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                                       placeholder="Full Name">
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-2 text-gray-700">Age *</label>
+                                <input type="number" name="passenger_${i}_age" required min="1" max="120"
+                                       class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                                       placeholder="Age">
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-2 text-gray-700">Adhar Number *</label>
+                                <input type="text" name="passenger_${i}_adhar" required maxlength="12"
+                                       class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                                       placeholder="12-digit Adhar Number">
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-2 text-gray-700">Email *</label>
+                                <input type="email" name="passenger_${i}_email" required
+                                       class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                                       placeholder="email@example.com">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block font-medium mb-2 text-gray-700">Phone Number</label>
+                                <input type="tel" name="passenger_${i}_phone"
+                                       class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                                       placeholder="Phone Number (Optional)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                passengerForms.innerHTML += formHTML;
+            }
+            
+            passengerSection.classList.remove('hidden');
+            passengerSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Show complete booking button
+            document.getElementById('proceedToDetails').classList.add('hidden');
+            document.getElementById('completeBooking').classList.remove('hidden');
+            document.getElementById('offlinebooking').classList.remove('hidden');
+            
+            // Add form validation
+            setupFormValidation();
+        }
+
+        function setupFormValidation() {
+            const inputs = document.querySelectorAll('#passengerForms input[required]');
+            const completeBtn = document.getElementById('completeBooking');
+            const offlnbutton = document.getElementById('offlinebooking')
+            
+            function validateForm() {
+                let allValid = true;
+                
+                inputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        allValid = false;
+                    }
+                    
+                    if (input.name.includes('adhar') && input.value.length !== 12) {
+                        allValid = false;
+                    }
+                    
+                    if (input.name.includes('age') && (parseInt(input.value) <= 0 || parseInt(input.value) > 120)) {
+                        allValid = false;
+                    }
+                });
+                
+                if (allValid) {
+                    completeBtn.disabled = false;
+                    offlnbutton.disabled = false;
+                    offlnbutton.className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5';
+                    completeBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5';
+                } else {
+                    completeBtn.disabled = true;
+                    offlnbutton.disabled = true;
+                    completeBtn.className = 'w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed transition-all duration-300';
+                    offlnbutton.className = 'w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-lg cursor-not-allowed transition-all duration-300';
+                }
+            }
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('blur', validateForm);
+            });
+            
+            validateForm();
+        }
+
+        function completeBooking() {
+            const passengerInputs = document.querySelectorAll('#passengerForms input');
+            const passengers = [];
+            
+            // Collect passenger data
+            for (let i = 0; i < requiredSeats; i++) {
+                const passenger = {
+                    name: document.querySelector(`[name="passenger_${i}_name"]`).value,
+                    age: parseInt(document.querySelector(`[name="passenger_${i}_age"]`).value),
+                    adhar_number: document.querySelector(`[name="passenger_${i}_adhar"]`).value,
+                    email: document.querySelector(`[name="passenger_${i}_email"]`).value,
+                    phone_number: document.querySelector(`[name="passenger_${i}_phone"]`).value,
+                    seat: selectedSeats[i]
+                };
+                passengers.push(passenger);
+            }
+            
+            // // Send booking data
+            
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden');
+            }
+        });
+
+    </script>
+
+    <!-- booking -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        function createBooking() {
+    // Collect passenger data from forms
+    const passengers = [];
+    for (let i = 0; i < requiredSeats; i++) {
+        const passenger = {
+            name: document.querySelector(`[name="passenger_${i}_name"]`).value.trim(),
+            age: parseInt(document.querySelector(`[name="passenger_${i}_age"]`).value),
+            adhar_number: document.querySelector(`[name="passenger_${i}_adhar"]`).value.trim(),
+            email: document.querySelector(`[name="passenger_${i}_email"]`).value.trim(),
+            phone_number: document.querySelector(`[name="passenger_${i}_phone"]`).value.trim(),
+            seat: selectedSeats[i]
+        };
+        passengers.push(passenger);
+    }
+
+    // Create Razorpay order by calling backend API
+    fetch('{% url "create_booking" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Ensure CSRF token is sent
+        },
+        body: JSON.stringify({
+            trip_id: tripId,
+            travelers: requiredSeats
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                openRazorpayPayment(data, passengers);
+            } else {
+                alert('Order creation failed: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while creating the order.');
+        });
+}
+
+// Open Razorpay payment modal
+function openRazorpayPayment(orderData, passengers) {
+    const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "TravelEase",
+        description: "Trip Booking Payment",
+        order_id: orderData.order_id,
+        handler: function (response) {
+            // Payment successful callback
+            confirmBookingAfterPayment(response, passengers);
+        },
+        prefill: {
+            name: "{{ user.first_name }} {{ user.last_name }}",
+            email: "{{ user.email }}",
+            contact: ""
+        },
+        theme: {
+            color: "#3b82f6"
+        },
+        modal: {
+            ondismiss: function() {
+                alert('Payment cancelled. You can retry the payment later.');
+            }
+        }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+// Offline Booking Function
+// Offline Booking Function
+function initiateOfflineBooking() {
+    // Collect passenger data
+    const passengers = collectPassengerData();
+    if (!passengers) return;
+    
+    // Collect selected seats
+    const selectedSeats = getSelectedSeats();
+    if (selectedSeats.length === 0) {
+        alert('Please select seats first');
+        return;
+    }
+    
+    // Show loading state
+    const payOfflineBtn = document.getElementById('offlinebooking');
+    const originalText = payOfflineBtn.innerHTML;
+    payOfflineBtn.disabled = true;
+    payOfflineBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+    
+    // Make API call to create offline booking
+    fetch(`{% url 'confirm_offline_booking' trip.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            passengers: passengers,
+            selected_seats: selectedSeats,
+            payment_method: 'offline'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.error}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showSuccessMessage('Booking reserved successfully!', 'Please pay offline within 72 hours.');
+            
+            // Redirect to success page after 2 seconds
+            setTimeout(() => {
+                window.location.href = "{% url 'mybookings' %}";
+            }, 2000);
+        } else {
+            // Show error message
+            showErrorMessage('Offline booking failed', data.message || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Offline booking error:', error);
+        showErrorMessage('Booking Error', 'Failed to create offline booking. Please check your provided credentials.');
+    })
+    .finally(() => {
+        // Restore button state
+        payOfflineBtn.disabled = false;
+        payOfflineBtn.innerHTML = originalText;
+    });
+}
+
+// Helper function to collect passenger data
+function collectPassengerData() {
+    const passengers = [];
+    const selectedSeats = getSelectedSeats();
+    
+    for (let i = 0; i < selectedSeats.length; i++) {
+        const nameInput = document.querySelector(`[name="passenger_${i}_name"]`);
+        const ageInput = document.querySelector(`[name="passenger_${i}_age"]`);
+        const adharInput = document.querySelector(`[name="passenger_${i}_adhar"]`);
+        const emailInput = document.querySelector(`[name="passenger_${i}_email"]`);
+        const phoneInput = document.querySelector(`[name="passenger_${i}_phone"]`);
+        
+        // Check if inputs exist
+        if (!nameInput || !ageInput || !adharInput || !emailInput) {
+            alert(`Missing form fields for passenger ${i + 1}`);
+            return null;
+        }
+        
+        // Validate required fields
+        const name = nameInput.value.trim();
+        const age = parseInt(ageInput.value);
+        const adhar_number = adharInput.value.trim();
+        const email = emailInput.value.trim();
+        const phone_number = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (!name || !age || !adhar_number || !email) {
+            alert(`Please fill all required fields for passenger ${i + 1}`);
+            return null;
+        }
+        
+        // Validate age
+        if (age <= 0 || age > 120) {
+            alert(`Please enter a valid age for passenger ${i + 1}`);
+            return null;
+        }
+        
+        // Validate Adhar number
+        if (adhar_number.length !== 12 || !/^\d{12}$/.test(adhar_number)) {
+            alert(`Please enter a valid 12-digit Adhar number for passenger ${i + 1}`);
+            return null;
+        }
+        
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert(`Please enter a valid email for passenger ${i + 1}`);
+            return null;
+        }
+        
+        const passenger = {
+            name: name,
+            age: age,
+            adhar_number: adhar_number,
+            email: email,
+            phone_number: phone_number,
+            seat: selectedSeats[i]
+        };
+        
+        passengers.push(passenger);
+    }
+    
+    return passengers;
+}
+
+// Helper function to get selected seats
+function getSelectedSeats() {
+    const selectedSeatElements = document.querySelectorAll('.seat.selected');
+    const seats = [];
+    
+    selectedSeatElements.forEach(seat => {
+        const seatCode = seat.getAttribute('data-seat');
+        if (seatCode) {
+            seats.push(seatCode);
+        }
+    });
+    
+    return seats;
+}
+
+// Helper function to show success message
+function showSuccessMessage(title, message) {
+    // Create modal or use existing notification system
+    const modal = createNotificationModal('success', title, message);
+    document.body.appendChild(modal);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    }, 3000);
+}
+
+// Helper function to show error message
+function showErrorMessage(title, message) {
+    // Create modal or use existing notification system
+    const modal = createNotificationModal('error', title, message);
+    document.body.appendChild(modal);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    }, 5000);
+}
+
+// Helper function to create notification modal
+function createNotificationModal(type, title, message) {
+    const modal = document.createElement('div');
+    modal.className = `fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    
+    modal.innerHTML = `
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium">${title}</h3>
+                <p class="mt-1 text-sm opacity-90">${message}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    return modal;
+}
+
+
+// Event listener binding
+
+// Utility to get CSRF token cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TravelEase - Your Journey Begins Here</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-900 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                        <i class="fas fa-plane text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        TravelEase
+                    </h1>
+                </div>
+
+                <!-- Navigation Icons -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Home">
+                        <i class="fas fa-home text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Destinations">
+                        <i class="fas fa-map-marked-alt text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="About Us">
+                        <i class="fas fa-info-circle text-xl"></i>
+                    </a>
+                    <a href="{% url 'errorpage' %}" class="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-300" title="Contact Us">
+                        <i class="fas fa-phone text-xl"></i>
+                    </a>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <!-- Authenticated User - Show Profile -->
+                        <div class="relative group">
+                            <button class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white hover:from-blue-700 hover:to-purple-700 transition duration-300">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div class="py-1">
+                                    <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ user.username }}</a>
+                                    <a href="{% url 'mybookings' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Bookings</a>
+                                    <a href="{% url 'errorpage' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Settings</a>
+                                    <hr class="my-1">
+                                    <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Anonymous User - Show Sign In/Sign Up -->
+                        <a href="{% url 'signin' %}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 inline-block text-center">
+                            Sign In
+                        </a>
+                        <a href="{% url 'signup' %}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 inline-block text-center">
+                            Sign Up
+                        </a>
+
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar Filter -->
+        <aside class="hidden lg:flex flex-col w-80 bg-white/70 backdrop-blur-sm shadow-xl fixed h-screen top-16 border-r border-gray-200" style="height: calc(100vh - 4rem);">
+            <div class="p-6 flex-1 overflow-y-auto">
+    {% if request.GET and request.GET.search or request.GET.travel_mode or request.GET.start_date or request.GET.end_date or request.GET.price_range %}
+    <div class="mb-2 flex justify-end">
+        <a href="{% url 'home' %}" class="text-blue-600 hover:underline text-sm flex items-center gap-1 px-3 py-1 rounded hover:bg-blue-50" title="Reset all filters">
+            <i class="fas fa-sync-alt"></i>
+            Reset Filters
+        </a>
+    </div>
+    {% endif %}
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-xl mb-6">
+        <h2 class="text-xl font-semibold text-white flex items-center">
+            <i class="fas fa-filter mr-2"></i>
+            Find Your Perfect Trip
+        </h2>
+    </div>
+    <!-- ...rest of your filter form... -->
+
+                
+                <form id="filterForm" method="GET" action="" class="space-y-6">
+    <!-- Search -->
+    <div class="relative">
+        <label for="search" class="block font-medium mb-2 text-gray-700">Search Destination</label>
+        <div class="relative">
+            <input type="text" id="search" name="search" placeholder="Where do you want to go?" 
+                   value="{{ request.GET.search|default_if_none:'' }}"
+                   class="w-full p-3 pl-10 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300" />
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+    </div>
+
+    <!-- Travel Mode -->
+    <div>
+        <label for="travel_mode" class="block font-medium mb-2 text-gray-700">Travel Mode</label>
+        <select id="travel_mode" name="travel_mode" 
+                class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+            <option value="">All Modes</option>
+            {% for mode in travel_modes %}
+            <option value="{{ mode.id }}" {% if request.GET.travel_mode == mode.id|stringformat:"s" %}selected{% endif %}>
+                {{ mode.travel_mode }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Date Range -->
+    <div class="grid grid-cols-1 gap-4">
+        <div>
+            <label for="start_date" class="block font-medium mb-2 text-gray-700">Departure Date</label>
+            <input type="date" id="start_date" name="start_date"
+                   value="{{ request.GET.start_date|default_if_none:'' }}"
+                   class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300" />
+        </div>
+        <div>
+            <label for="end_date" class="block font-medium mb-2 text-gray-700">Return Date</label>
+            <input type="date" id="end_date" name="end_date"
+                   value="{{ request.GET.end_date|default_if_none:'' }}"
+                   class="w-full p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300" />
+        </div>
+    </div>
+
+    <!-- Price Range -->
+    <div>
+        <label class="block font-medium mb-2 text-gray-700">Budget Range (₹)</label>
+        <div class="space-y-2">
+            <div class="flex justify-between text-sm text-gray-600">
+                <span>₹1,000</span>
+                <span id="rangeValue">₹{{ request.GET.price_range|default_if_none:'5000' }}</span>
+                <span>₹10,000</span>
+            </div>
+            <input type="range" 
+                   name="price_range" 
+                   min="1000" 
+                   max="10000" 
+                   step="100" 
+                   value="{{ request.GET.price_range|default_if_none:'5000' }}"
+                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                   oninput="document.getElementById('rangeValue').textContent = '₹' + this.value" />
+        </div>
+    </div>
+
+</form>
+
+            </div>
+            
+            <!-- Fixed Apply Filters Button at Bottom -->
+            <div class="p-6 border-t border-gray-200 bg-white">
+                <button type="submit" form="filterForm" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="fas fa-search mr-2"></i>Apply Filters
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 lg:ml-80 p-6">
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <div class="relative z-10">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Discover Amazing Destinations</h1>
+                    <p class="text-xl opacity-90 mb-6">Find the perfect trip that matches your dreams and budget</p>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <span class="font-semibold">{{ travel_options|length }}</span>
+                            <span class="opacity-90 ml-1">Available Trips</span>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                            <span class="font-semibold">24/7</span>
+                            <span class="opacity-90 ml-1">Support</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"></div>
+            </div>
+
+            <!-- Travel Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {% for option in travel_options %}
+               <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100 animate-card"
+     data-delay="{{ forloop.counter0 }}">
+
+                    
+                    <!-- Card Header -->
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white relative">
+                        <div class="absolute top-4 right-4">
+                            {% if option.available_seats <= 5 %}
+                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    <i class="fas fa-fire mr-1"></i>Limited
+                                </span>
+                            {% else %}
+                                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    <i class="fas fa-check mr-1"></i>Available
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-2">
+                            <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                                {{ option.traveltype.travel_mode }}
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">{{ option.source }} → {{ option.destination }}</h3>
+                        <p class="opacity-90">{{ option.days }} Days / {{ option.nights }} Nights</p>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-calendar-alt w-5 text-blue-500"></i>
+                                <span class="ml-3 font-medium">{{ option.travel_date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-undo w-5 text-green-500"></i>
+                                <span class="ml-3 font-medium">{{ option.return_date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="flex items-center text-gray-600">
+                                <i class="fas fa-users w-5 text-purple-500"></i>
+                                <span class="ml-3 font-medium">{{ option.available_seats }} seats available</span>
+                            </div>
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div>
+                                    <span class="text-3xl font-bold text-gray-800">₹{{ option.price }}</span>
+                                    {% if option.number_of_persons <= 1 %}
+                                    <span class="text-gray-500 text-sm">/person</span>
+                                    {% else %}
+                                    <span class="text-gray-500 text-sm">/{{option.number_of_persons}} person</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-500">Listed</div>
+                                    <div class="text-sm font-medium">{{ option.created_at|date:"M d" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="p-6 pt-0">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'details' option.id %}" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group-hover:scale-105 inline-flex items-center justify-center">
+                                <i class="fas fa-eye mr-2"></i>View Details
+                            </a>
+                        {% else %}
+                            <div class="relative group">
+                                <button class="w-full bg-gray-400 text-white py-3 rounded-xl cursor-not-allowed font-medium flex items-center justify-center" disabled>
+                                    <i class="fas fa-lock mr-2"></i>View Details
+                                </button>
+                                <!-- Tooltip -->
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
+                                    Please login to view details
+                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-16">
+                    <div class="bg-white rounded-2xl p-12 shadow-lg">
+                        <i class="fas fa-map-marked-alt text-6xl text-gray-300 mb-6"></i>
+                        <h3 class="text-2xl font-bold text-gray-600 mb-4">No trips found</h3>
+                        <p class="text-gray-500 mb-6">Try adjusting your filters or check back later for new destinations.</p>
+                        <a href="{% url 'home' %}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition duration-300 inline-block">
+                            Reset Filters
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                            <i class="fas fa-plane text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">TravelEase</h3>
+                    </div>
+                    <p class="text-gray-400">Making your travel dreams come true with the best deals and experiences worldwide.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Destinations</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Refund Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Get in Touch</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i>+91 12345 67890</p>
+                        <p><i class="fas fa-envelope mr-2"></i>info@travelease.com</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>Mumbai, India</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 TravelEase. All rights reserved. Made with ❤️ in India</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        @keyframes slideInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-card {
+    opacity: 0;
+    animation: slideInUp 0.6s ease forwards;
+}
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('[style*="slideInUp"]');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.animate-card');
+    cards.forEach((card, index) => {
+        const delay = card.getAttribute('data-delay') * 100;
+        card.style.animationDelay = delay + 'ms';
+    });
+
+
+});
+    </script>
+
+</body>
+</html>
