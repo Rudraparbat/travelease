@@ -42,26 +42,23 @@ venv\Scripts\activate   # On Linux use: source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-4. Run Makemigrations 
-```bash
-python manage.py makemigrations
-```
-5. Run migrations
-```bash
-python manage.py migrate
-```
-
-### Befor Running The Server :- 
-
 #### Create A .env File In The Project Directory 
-
-6. Add These For Better Experience To .env File
+4. Add These For Better Experience To .env File
 
 ```bash
 RAZORPAY_KEY_ID = 'rzp_test_31Lp1Ol0O2d1Ug'
 RAZORPAY_SECRET_ID = 'AdqWbdTtjGsaBUGq3HwVkm1a'
 DB_URL = "postgresql://neondb_owner:npg_Lqmvckdn84St@ep-wild-dream-adwrnroi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 DJANGO_DEBUG=True
+```
+
+5. Run Makemigrations 
+```bash
+python manage.py makemigrations
+```
+6. Run migrations
+```bash
+python manage.py migrate
 ```
 
 7. Start development server
@@ -85,12 +82,15 @@ venv\Scripts\activate   # On Linux use: source venv/bin/activate
 
 ### Befor Running The Container :- 
 
-#### Create A .env File In The Project Directory And Follow Step No. 6 From Installation and Set-up Without Docker
+#### Create A .env File In The Project Directory And Follow Step No. 4 From Installation and Set-up Without Docker
 
 3. Start The Docker Container 
 ```bash
 docker-compose up --build
 ```
+
+### Note :- If There Is Any Error Like  "web-1  | exec /app/entrypoint.prod.sh: no such file or directory" Then Change File Type From CRLF TO LF
+
 
 ## Local Server Always Available At :-  http://127.0.0.1:8000/ 
 
