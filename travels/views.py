@@ -205,9 +205,9 @@ def confirm_online_booking(request, trip_id):
     try:
         data = json.loads(request.body)
 
-        razorpay_payment_id = data.get('razorpay_payment_id')
-        razorpay_order_id = data.get('razorpay_order_id')
-        razorpay_signature = data.get('razorpay_signature')
+        razorpay_payment_id = data.get('payment_id')
+        razorpay_order_id = data.get('order_id')
+        razorpay_signature = data.get('signature')
         passengers_data = data.get('passengers')
         selected_seats = data.get('selected_seats')
 

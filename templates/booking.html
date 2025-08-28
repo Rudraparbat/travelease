@@ -626,6 +626,11 @@
         };
         passengers.push(passenger);
     }
+    // Show loading state on button
+    const payBtn = document.getElementById('completeBooking');
+    const originalText = payBtn.innerHTML;
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
 
     // Create Razorpay order by calling backend API
     fetch('{% url "create_booking" %}', {
@@ -643,6 +648,8 @@
         .then(data => {
             if (data.success) {
                 openRazorpayPayment(data, passengers);
+                payBtn.disabled = false;
+                payBtn.innerHTML = originalText;
             } else {
                 alert('Order creation failed: ' + data.message);
             }
@@ -682,6 +689,60 @@ function openRazorpayPayment(orderData, passengers) {
     };
     const rzp = new Razorpay(options);
     rzp.open();
+}
+// Initial Online Booking Function
+function confirmBookingAfterPayment(paymentResponse, passengers) {
+    // Show loading state
+    const payBtn = document.getElementById('completeBooking');
+    const originalText = payBtn.innerHTML;
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+
+    // Make API call to confirm booking
+    fetch(`{% url 'confirm_booking' trip.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            payment_id: paymentResponse.razorpay_payment_id,
+            order_id: paymentResponse.razorpay_order_id,
+            signature: paymentResponse.razorpay_signature,
+            passengers: passengers,
+            selected_seats: selectedSeats,
+            payment_method: 'online'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.error}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showSuccessMessage('Booking Confirmed!', 'Your booking was successful.');
+
+            // Redirect to success page after 2 seconds
+            setTimeout(() => {
+                window.location.href = "{% url 'mybookings' %}";
+            }, 2000);
+        } else {
+            // Show error message
+            showErrorMessage('Payment Verification Failed', data.message || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Booking confirmation error:', error);
+        showErrorMessage('Booking Error', 'Failed to confirm booking. Please contact support.');
+    })
+    .finally(() => {
+        // Restore button state
+        payBtn.disabled = false;
+        payBtn.innerHTML = originalText;
+    });
 }
 // Offline Booking Function
 // Offline Booking Function

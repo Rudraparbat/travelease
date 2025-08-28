@@ -211,10 +211,15 @@
                             <div class="space-y-3">
                                 
                                 {% if booking.payment_status == 'pending' %}
-                                <a href="" 
-                                   class="w-full bg-yellow-500 text-white py-3 px-4 rounded-xl hover:bg-yellow-600 transition-all duration-300 font-medium text-center inline-block">
-                                    <i class="fas fa-credit-card mr-2"></i>Pay Online       
-                                </a>
+                                <button id="completeBooking" 
+                                        class="w-full bg-yellow-500 text-white py-3 px-4 rounded-xl hover:bg-yellow-600 transition-all duration-300 font-medium text-center inline-block relative group"
+                                        title="Under Construction">
+                                    <i class="fas fa-credit-card mr-2"></i>Pay Online
+                                    <div class="absolute invisible opacity-0 group-hover:visible group-hover:opacity-100 bg-gray-800 text-white text-sm py-2 px-4 rounded-lg -top-12 left-1/2 transform -translate-x-1/2 transition-all duration-200">
+                                        Not working - Under Construction
+                                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-gray-800"></div>
+                                    </div>
+                                </button>
                                 <a href="{% url 'cancel_offline_booking' booking.id %}" 
                                    class="w-full bg-red-500 text-white py-3 px-4 rounded-xl hover:bg-red-600 transition-all duration-300 font-medium text-center inline-block">
                                     <i class="fas fa-times mr-2"></i>Cancel Reservation
@@ -506,5 +511,7 @@
             </div>
         </div>
     </footer>
+
+       
 </body>
 </html>
