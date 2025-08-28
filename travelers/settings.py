@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+import sys
 import dj_database_url
 from dotenv import load_dotenv
 load_dotenv()
@@ -89,6 +90,14 @@ if os.getenv('DB_URL') :
         default=os.getenv('DB_URL')
     )
 
+if 'test' in sys.argv:
+    defaults = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # In-memory database for speed
+        'TEST': {},
+    }
+
+print("DATABASES:", defaults)
 
 DATABASES = {
     'default': defaults
