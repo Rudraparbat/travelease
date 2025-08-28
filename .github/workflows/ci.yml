@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12' 
 
       # Install dependencies
-      - name.env: Install Dependencies
+      - name: Install Dependencies
         env:
           PSYCOPG2_BINARY: "true" 
         run: |
