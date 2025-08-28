@@ -84,12 +84,128 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button class="md:hidden text-gray-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+                <button id="mobile-menu-button" class="md:hidden text-gray-700">
+    <i class="fas fa-bars text-xl"></i>
+</button>
             </div>
         </div>
     </nav>
+    <!-- Mobile Menu (add this right after your navbar) -->
+<div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg border-t border-gray-200">
+    <div class="px-4 py-2 space-y-1">
+        <a href="/" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md">
+            <i class="fas fa-home mr-2"></i>Home
+        </a>
+        <a href="{% url 'errorpage' %}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md">
+            <i class="fas fa-map-marked-alt mr-2"></i>Destinations  
+        </a>
+        <a href="{% url 'errorpage' %}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md">
+            <i class="fas fa-info-circle mr-2"></i>About Us
+        </a>
+        <a href="{% url 'errorpage' %}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md">
+            <i class="fas fa-phone mr-2"></i>Contact Us
+        </a>
+        
+        {% if not user.is_authenticated %}
+        <div class="border-t border-gray-200 pt-2 mt-2">
+            <a href="{% url 'signin' %}" class="block px-3 py-2 text-blue-600 font-medium">Sign In</a>
+            <a href="{% url 'signup' %}" class="block px-3 py-2 bg-blue-600 text-white rounded-md text-center">Sign Up</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Mobile View Filter -->
+<button id="mobile-filter-btn" class="fixed bottom-20 right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-lg md:hidden z-50 hover:from-blue-700 hover:to-purple-700 transition duration-300">
+        <i class="fas fa-filter text-lg"></i>
+    </button>
+
+<!-- Mobile Filter Modal -->
+<div id="mobile-filter-modal" class="fixed inset-0 bg-black/50 md:hidden hidden z-50">
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-hidden">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">Filter Trips</h3>
+            <button id="mobile-filter-close" class="p-2 text-gray-600 hover:text-gray-800">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Filter Content (scrollable) -->
+        <div class="p-4 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+            <!-- Copy your existing filter form here -->
+            <form id="mobileFilterForm" method="GET" action="" class="space-y-6">
+                <!-- Search -->
+                <div class="relative">
+                    <label for="mobile_search" class="block font-medium mb-2 text-gray-700">Search Destination</label>
+                    <input type="text" id="mobile_search" name="search" placeholder="Where do you want to go?" 
+                           value="{{ request.GET.search|default_if_none:'' }}"
+                           class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg" />
+                </div>
+
+                <!-- Travel Mode -->
+                <div>
+                    <label for="mobile_travel_mode" class="block font-medium mb-2 text-gray-700">Travel Mode</label>
+                    <select id="mobile_travel_mode" name="travel_mode" 
+                            class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+                        <option value="">All Modes</option>
+                        {% for mode in travel_modes %}
+                        <option value="{{ mode.id }}" {% if request.GET.travel_mode == mode.id|stringformat:"s" %}selected{% endif %}>
+                            {{ mode.travel_mode }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Date Range -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="mobile_start_date" class="block font-medium mb-2 text-gray-700">Departure Date</label>
+                        <input type="date" id="mobile_start_date" name="start_date"
+                               value="{{ request.GET.start_date|default_if_none:'' }}"
+                               class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg" />
+                    </div>
+                    <div>
+                        <label for="mobile_end_date" class="block font-medium mb-2 text-gray-700">Return Date</label>
+                        <input type="date" id="mobile_end_date" name="end_date"
+                               value="{{ request.GET.end_date|default_if_none:'' }}"
+                               class="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg" />
+                    </div>
+                </div>
+
+                <!-- Price Range -->
+                <div>
+                    <label class="block font-medium mb-2 text-gray-700">Budget Range (₹)</label>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>₹1,000</span>
+                            <span id="mobileRangeValue">₹{{ request.GET.price_range|default_if_none:'5000' }}</span>
+                            <span>₹10,000</span>
+                        </div>
+                        <input type="range" 
+                               name="price_range" 
+                               min="1000" 
+                               max="10000" 
+                               step="100" 
+                               value="{{ request.GET.price_range|default_if_none:'5000' }}"
+                               class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                               oninput="document.getElementById('mobileRangeValue').textContent = '₹' + this.value" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Bottom Action Buttons -->
+        <div class="p-4 border-t border-gray-200 bg-white space-y-3">
+            <button type="submit" form="mobileFilterForm" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-medium text-lg">
+                Apply Filters
+            </button>
+            <a href="{% url 'home' %}" class="w-full block text-center py-3 text-gray-600 border border-gray-300 rounded-xl">
+                Clear All
+            </a>
+        </div>
+    </div>
+</div>
 
     <div class="flex">
         <!-- Sidebar Filter -->
@@ -416,9 +532,71 @@
         card.style.animationDelay = delay + 'ms';
     });
 
+    const menuButton = document.querySelector('#mobile-menu-button');
+    const mobileMenu = document.querySelector('#mobile-menu');
+    
+    if (menuButton && mobileMenu) {
+        menuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle hamburger icon
+            const icon = menuButton.querySelector('i');
+            if (mobileMenu.classList.contains('hidden')) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!menuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+                const icon = menuButton.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    }
+
+
 
 });
     </script>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtn = document.getElementById('mobile-filter-btn');
+    const filterModal = document.getElementById('mobile-filter-modal');
+    const closeBtn = document.getElementById('mobile-filter-close');
+    
+    // Open modal
+    filterBtn?.addEventListener('click', function() {
+        filterModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    });
+    
+    // Close modal
+    function closeModal() {
+        filterModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    closeBtn?.addEventListener('click', closeModal);
+    
+    // Close on backdrop click
+    filterModal?.addEventListener('click', function(e) {
+        if (e.target === filterModal) {
+            closeModal();
+        }
+    });
+    
+    // Your existing mobile menu code...
+});
+</script>
+
 
 </body>
 </html>
